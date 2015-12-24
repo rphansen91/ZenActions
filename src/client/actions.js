@@ -1,44 +1,51 @@
-/**
- * Mixins namespace to mix into our action creation methods
- * Registers a mixin by name and object containing
- * methods to mixins (functions).
- * @type {{}}
- */
-ZenMixins = {
-  registerMixin(name, object) {
-    if (!_.isUndefined(this[name])) {
-      throw new Meteor.Error(400,
-        'A Mixin with this name has already been registered');
+(function (window, angular) {
+
+    var ngZen = angular.module('ngZen', [])
+    .provider('ngZenActions', ZenActionsProvider)
+
+    function ZenActionsProvider () {
+
+        var provider = {}
+
+        provider.Mixins = {}
+
+        provider.$get = [function () {
+
+            var Actions = {}
+
+            Actions.registerMixin = function (name, object) {
+                if (!_.isUndefined(provider.Mixins[name])) {
+                    throw new Error("A Mixin with the name: '"+ name +"' has already been registered")
+                }
+                provider.Mixins[name] = object;
+                return;
+            }
+
+            Actions.getActions = function (mixins) {
+                mixins = _.filter(mixins, _.isString)
+                console.log(mixins)
+
+                if (_.isEmpty(mixins)) {
+                    return;
+                }
+
+                var zenMixins = {};
+                _.each(mixins, function (mixin) {
+                    if (!provider.Mixins[mixin]) {
+                        throw new Error("ERROR: No Mixin with the name: '" + mixin + "'");
+                    }
+                    _.extend(zenMixins, provider.Mixins[mixin]);
+                })
+                
+                return zenMixins;
+            }
+
+            return Actions;
+
+        }]
+
+        return provider;
+
     }
-    this[name] = object;
-    return;
-  }
-};
 
-
-/**
- * Create an Action Creator
- * @param mixins [] An array of mixin keys to attach to the
- * object during construction
- * @constructor
- */
-ZenAction = function ZenAction(...mixins) {
-  // check if the mixin array is an array of strings
-  Match.Optional([String]);
-
-  if (_.isEmpty(mixins)) {
-    return;
-  }
-
-  let zenMixins = {};
-
-  _.each(mixins,(mixin) => {
-    if (!ZenMixins[mixin]) {
-      throw new Meteor.Error(400, 'ERROR: No Mixin with this name');
-    }
-    _.extend(zenMixins, ZenMixins[mixin]);
-  });
-
-  return zenMixins;
-};
-
+})(window, window.angular)
