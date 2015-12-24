@@ -53,7 +53,7 @@ angular.directive("YOUR_DIRECTIVE", function (ngZenActions) {
 
 ```html
 <div your-directive>
-  <button ng-click="actions.toggle"></button>
+  <button ng-click="actions.toggle()"></button>
 
   <div ng-show="actions.visible">
     {{YOUR_DATA}}
