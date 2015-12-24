@@ -26,6 +26,7 @@ angular.module('YOUR_MODULE', ['ngZen'])
 
 ### Mixins
 
+```js
 angular.factory('YOUR_TOP_LEVEL_FACTORY', function (ngZenActions) {
   var actions = {}
   
@@ -36,17 +37,21 @@ angular.factory('YOUR_TOP_LEVEL_FACTORY', function (ngZenActions) {
 
   ngZenActions.registerMixin("VISIBILITY_ACTIONS", actions)
 })
+```
 
 ### Actions
 
+```js
 angular.directive("YOUR_DIRECTIVE", function (ngZenActions) {
   return function (scope, element, attrs) {
     scope.actions = ngZenActions.getActions(["VISIBILITY_ACTIONS"])
   }
 })
+```
 
 ### Template
 
+```html
 <div your-directive>
   <button ng-click="actions.toggle"></button>
 
@@ -54,6 +59,7 @@ angular.directive("YOUR_DIRECTIVE", function (ngZenActions) {
     {{YOUR_DATA}}
   </div>
 </div>
+```
 
 ### Dependencies
 
