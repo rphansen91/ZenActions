@@ -22,7 +22,7 @@ Example app (BLAZE) here [ZenActions example](https://github.com/abhiaiyer91/Zen
 
 Add `ngZenActions` to your app:
 
-angular.module('YOUR_MODULE', [ngZen])
+angular.module('YOUR_MODULE', ['ngZen'])
 
 ### Mixins
 
