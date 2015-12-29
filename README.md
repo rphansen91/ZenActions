@@ -4,8 +4,11 @@ Fork of [ZenActions (Blaze, React)](https://github.com/abhiaiyer91/ZenActions) b
 
 A simple, yet powerful tool to reuse business logic in the view layer.
 
-`ZenActions` is the first of 2 packages to help build your Meteor app in a `"Flux"-like manner`. `ZenActions` allow you to
-abstract business logic from your views into digestable chunks to use between `Blaze` Templates or `React` Components.
+
+`ZenActions` was originally created as the first of 2 packages to help build Meteor apps in a `"Flux"-like manner`. However this basic pattern is very powerful in large scale `Angular` apps as well!
+
+`ngZen` is a wrapper around `ZenActions` for `Angular` and allows you to
+abstract business logic from your views into digestable chunks to use between `Directives` and `Controllers` templates.
 
 Abhi wrote a blog post about this package here [ZenActions](https://medium.com/@abhiaiyer/zenactions-972e5c61c30c#.h55t6cxye)
 
@@ -20,31 +23,60 @@ Example app (BLAZE) here [ZenActions example](https://github.com/abhiaiyer91/Zen
 
 ### Getting Started
 
-Add `ngZenActions` to your app:
+Add `ngZen` to your app:
 
-angular.module('YOUR_MODULE', ['ngZen'])
+var exampleApp = angular.module('YOUR_MODULE', ['ngZen'])
 
 ### Mixins
 
 ```js
-angular.factory('YOUR_TOP_LEVEL_FACTORY', function (ngZenActions) {
-  var actions = {}
+exampleApp.config(function (ngZenActionsProvider) {
   
-  actions.visible = false
-  actions.toggle = function () {
-    actions.visible = !actions.visible;
-  } 
+  // HINT: MIXINS CAN ALSO BE REGISTERED THROUGH A FACTORY OR SERVICE
+  // ie: $inject(ngZenActions)
+  var Mixins = {
+    "VISIBILITY_ACTIONS":  new VisibilityActions()
+  }
+  
+  // IMPORTANT!!!
+  // HELPER FUNCTION TO REGISTER ALL CLASSES SPECIFIED
+  _.mapObject(Mixins, function (value, key) {
+    ngZenActionsProvider.registerMixin(key, value)
+  })
+  
+  // ANY REUSABLE CLASS OR LOGIC
+  function VisibilityActions () {
+    this.visible = true;
 
-  ngZenActions.registerMixin("VISIBILITY_ACTIONS", actions)
+    this.toggle = function () {
+      this.visible = !this.visible
+    }
+  }
 })
 ```
 
 ### Actions
 
 ```js
-angular.directive("YOUR_DIRECTIVE", function (ngZenActions) {
-  return function (scope, element, attrs) {
-    scope.actions = ngZenActions.getActions(["VISIBILITY_ACTIONS"])
+exampleApp.directive("YOUR_DIRECTIVE", function () {
+  return {
+    templateUrl: "template.html",
+    controller: function (ngZenActions, dataService) {
+      var actions = this; // HOLD REFERENCE
+
+      // SPECIFY ACTIONS AND THEY WILL ALL BE 
+      // MIXED INTO THE CONTROLLER INSTANCE 
+      // AND BOUND TO `template.html`
+      _.extend(actions, ngZenActions.getActions(["VISIBILITY_ACTIONS"]))
+
+      // ADDITTIONAL INFO CAN BE EXTENDED ON
+      dataService.get()
+      .then(function (res) {
+        actions.data = res
+      })
+      
+    },
+    controllerAs: "actions"
   }
 })
 ```
@@ -52,13 +84,11 @@ angular.directive("YOUR_DIRECTIVE", function (ngZenActions) {
 ### Template
 
 ```html
-<div your-directive>
   <button ng-click="actions.toggle()"></button>
 
   <div ng-show="actions.visible">
-    {{YOUR_DATA}}
+    {{actions.data}}
   </div>
-</div>
 ```
 
 ### Dependencies
